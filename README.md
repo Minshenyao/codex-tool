@@ -25,7 +25,7 @@ go build -trimpath -ldflags='-s -w' -o codex-tool .
 | `relay` | 配置兼容 OpenAI Responses API 的自定义供应方和模型列表。 |
 | `plugins` | 从 OpenAI 的公开插件仓库创建并注册本地市场快照。 |
 | `plugins-status` | 查询已注册的本地插件市场。 |
-| `install` | 在 `~/Applications` 创建 `Codex 中文.app`。 |
+| `install` | 在 `~/Applications` 创建使用官方 ChatGPT 图标的 `ChatGPT-中文.app`。 |
 | `verify` | 查看实验性启动器报告的内部状态。界面语言请以窗口里实际显示的文字为准。 |
 | `status` | 查看官方客户端、本地配置文件和启动器的位置。 |
 
@@ -45,6 +45,8 @@ go build -trimpath -ldflags='-s -w' -o codex-tool .
 
 ### 实验性中文启动器
 
-`install` 仅创建启动器。请先退出官方客户端，再在 Finder 中打开 `~/Applications/Codex 中文.app`。启动器依赖官方客户端随附的 Node 以及应用内部的语言设置。运行时会启用仅限本机的调试会话，处理窗口时可能使其刷新。调试会话无法建立时，可以从 Finder 正常打开官方客户端。
+`install` 仅创建启动器，并从已通过签名校验的官方 ChatGPT 应用复制其图标。请先退出官方客户端，再在 Finder 中打开 `~/Applications/ChatGPT-中文.app`。启动器依赖官方客户端随附的 Node 以及应用内部的语言设置。运行时会启用仅限本机的调试会话，处理窗口时可能使其刷新。调试会话无法建立时，可以从 Finder 正常打开官方客户端。
 
-可运行 `./codex-tool verify` 查看内部状态。日志位于 `~/Library/Logs/Codex中文启动器.log`。停用时退出客户端，直接打开官方应用即可。要移除启动器，将 `~/Applications/Codex 中文.app` 移到废纸篓。
+可运行 `./codex-tool verify` 查看内部状态。日志位于 `~/Library/Logs/ChatGPT-中文启动器.log`。停用时退出客户端，直接打开官方应用即可。要移除启动器，将 `~/Applications/ChatGPT-中文.app` 移到废纸篓。
+
+从早期版本升级时，旧的 `Codex 中文.app` 不会自动删除；确认不再使用后可手动移到废纸篓。

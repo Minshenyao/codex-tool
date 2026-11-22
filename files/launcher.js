@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Codex 中文界面启动器（macOS Apple Silicon，实验性）
+ * ChatGPT-中文 界面启动器（macOS Apple Silicon，实验性）
  *
  * 原理：官方 Codex 的界面语言由远程配置层 72216192 的 enable_i18n 开关控制，
  * 该开关默认 false，只在联网且服务器下发时才会开启。本脚本以远程调试端口启动
@@ -354,7 +354,7 @@ function verifyState(port) {
   try {
     state = readState(port);
   } catch {
-    throw new Error('未找到可验证的启动器会话，请通过「Codex 中文」启动后重试');
+    throw new Error('未找到可验证的启动器会话，请通过「ChatGPT-中文」启动后重试');
   }
   const age = Date.now() - state?.checkedAt;
   if (state?.port !== port || typeof state.result?.ok !== 'boolean' || !Number.isFinite(age) ||
@@ -401,7 +401,7 @@ async function main() {
     throw new Error('当前启动器需要 macOS Apple Silicon 和支持 WebSocket 的 Node.js 运行时');
   }
   const executable = findApp(opts.app);
-  if (isRunning(executable)) throw new Error('请退出正在运行的 Codex，再通过「Codex 中文」启动');
+  if (isRunning(executable)) throw new Error('请退出正在运行的 Codex，再通过「ChatGPT-中文」启动');
   if (listeners(opts.port).length) throw new Error('调试端口已被占用，启动器不会连接现有会话');
   ensureStateDir();
   const daemonIdentity = processIdentity(process.pid);
