@@ -88,7 +88,7 @@ const infoPlist = `<?xml version="1.0" encoding="UTF-8"?>
   <key>CFBundleDisplayName</key><string>ChatGPT-中文</string>
   <key>CFBundleIdentifier</key><string>local.chatgpt.zh.launcher</string>
   <key>CFBundleVersion</key><string>1</string>
-  <key>CFBundleShortVersionString</key><string>0.1.1</string>
+  <key>CFBundleShortVersionString</key><string>0.1.2</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleExecutable</key><string>launcher</string>
   <key>CFBundleIconFile</key><string>icon.icns</string>

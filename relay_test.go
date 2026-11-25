@@ -127,6 +127,19 @@ func TestRelayLeavesFilesUntouchedOnConflict(t *testing.T) {
 	}
 }
 
+func TestFixedRelayCatalogContainsExactlyRequestedModels(t *testing.T) {
+	catalog := buildCatalog(fixedRelayModels, "Test relay", 272000, false)
+	want := []string{"deepseek-v4-flash", "deepseek-v4-pro", "gpt-6-luna", "glm-5.3", "glm-5.3-flash"}
+	if len(catalog.Models) != len(want) {
+		t.Fatalf("catalog has %d models, want %d", len(catalog.Models), len(want))
+	}
+	for i, model := range catalog.Models {
+		if model.Slug != want[i] || model.DisplayName != want[i] || model.Priority != i+1 {
+			t.Fatalf("model %d is %#v, want slug and display name %q", i, model, want[i])
+		}
+	}
+}
+
 func testRelaySettings() relaySettings {
 	return relaySettings{
 		providerID: "relay", providerName: "Test relay", baseURL: "https://relay.example.test/v1",

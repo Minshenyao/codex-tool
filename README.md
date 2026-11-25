@@ -22,7 +22,7 @@ go build -trimpath -ldflags='-s -w' -o codex-tool .
 
 | 命令 | 用途 |
 | --- | --- |
-| `relay` | 配置兼容 OpenAI Responses API 的自定义供应方和模型列表。 |
+| `relay` | 配置兼容 OpenAI Responses API 的自定义供应方和固定模型列表。 |
 | `plugins` | 从 OpenAI 的公开插件仓库创建并注册本地市场快照。 |
 | `plugins-status` | 查询已注册的本地插件市场。 |
 | `install` | 在 `~/Applications` 创建使用官方 ChatGPT 图标的 `ChatGPT-中文.app`。 |
@@ -31,7 +31,7 @@ go build -trimpath -ldflags='-s -w' -o codex-tool .
 
 ### 自定义供应方
 
-`relay` 会尝试用提供的地址查询模型。查询失败时可以手动填入模型 ID。供应方还需要支持 Codex 使用的 Responses API。模型列表查询只检查模型发现。
+`relay` 使用固定的五个模型：`deepseek-v4-flash`、`deepseek-v4-pro`、`gpt-6-luna`、`glm-5.3`、`glm-5.3-flash`。它不会向中转站查询模型，也不会把其他模型写入目录。供应方需要支持 Codex 使用的 Responses API，并提供这五个模型 ID。
 
 如供应方需要 API 密钥，输入**环境变量名**，例如 `MY_RELAY_API_KEY`。在运行本工具及使用该供应方的 Codex 进程中设置该变量。自定义带密钥的网络地址请使用 HTTPS。
 

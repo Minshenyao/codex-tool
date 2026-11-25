@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -129,6 +127,13 @@ var (
 	relayIDPattern      = regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`)
 	relayEnvPattern     = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 	errRelayLegacyToken = errors.New("供应方仍配置了旧版明文密钥，需确认迁移")
+	fixedRelayModels    = []string{
+		"deepseek-v4-flash",
+		"deepseek-v4-pro",
+		"gpt-6-luna",
+		"glm-5.3",
+		"glm-5.3-flash",
+	}
 )
 
 func relayURL(raw string) (*url.URL, error) {
@@ -142,83 +147,6 @@ func relayURL(raw string) (*url.URL, error) {
 
 func relayLoopback(host string) bool {
 	return strings.EqualFold(host, "localhost") || net.ParseIP(host).IsLoopback()
-}
-
-func fetchRelayModels(baseURL *url.URL, secret string) ([]string, error) {
-	req, err := http.NewRequest(http.MethodGet, baseURL.JoinPath("models").String(), nil)
-	if err != nil {
-		return nil, errors.New("无法创建模型列表请求")
-	}
-	if secret != "" {
-		req.Header.Set("Authorization", "Bearer "+secret)
-	}
-	client := &http.Client{
-		Timeout:       15 * time.Second,
-		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
-	}
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, errors.New("无法连接模型列表接口，请检查地址和网络")
-	}
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("模型列表接口返回 HTTP %d", res.StatusCode)
-	}
-	const sizeLimit = 4 << 20
-	body, err := io.ReadAll(io.LimitReader(res.Body, sizeLimit+1))
-	if err != nil || len(body) > sizeLimit {
-		return nil, errors.New("无法读取模型列表或响应过大")
-	}
-	var root any
-	if err := json.Unmarshal(body, &root); err != nil {
-		return nil, errors.New("模型列表接口未返回有效 JSON")
-	}
-	var items []any
-	switch v := root.(type) {
-	case []any:
-		items = v
-	case map[string]any:
-		for _, key := range []string{"data", "models"} {
-			if list, ok := v[key].([]any); ok {
-				items = list
-				break
-			}
-		}
-	}
-	var models []string
-	for _, item := range items {
-		switch model := item.(type) {
-		case string:
-			models = append(models, model)
-		case map[string]any:
-			for _, key := range []string{"id", "slug", "name"} {
-				if id, ok := model[key].(string); ok && id != "" {
-					models = append(models, id)
-					break
-				}
-			}
-		}
-	}
-	models = usableRelayModels(models, secret)
-	if len(models) == 0 {
-		return nil, errors.New("模型列表接口没有返回可用模型")
-	}
-	return models, nil
-}
-
-func usableRelayModels(models []string, secret string) []string {
-	seen := make(map[string]bool)
-	var usable []string
-	for _, id := range models {
-		id = strings.TrimSpace(id)
-		if id == "" || seen[id] || strings.ContainsFunc(id, unicode.IsControl) ||
-			(secret != "" && strings.Contains(id, secret)) {
-			continue
-		}
-		usable = append(usable, id)
-		seen[id] = true
-	}
-	return usable
 }
 
 type relaySettings struct {
@@ -736,25 +664,8 @@ func taskRelay() error {
 		return err
 	}
 
-	fmt.Print("正在获取模型列表 ... ")
-	models, err := fetchRelayModels(baseURL, secret)
-	if err != nil {
-		fmt.Println(err)
-		manual := askRequired("请输入模型名（以逗号或空白分隔）")
-		models = usableRelayModels(strings.FieldsFunc(manual, func(r rune) bool {
-			return r == ',' || unicode.IsSpace(r)
-		}), secret)
-		if len(models) == 0 {
-			return errors.New("没有可用模型")
-		}
-	} else {
-		fmt.Printf("成功，共 %d 个\n", len(models))
-	}
-	if len(models) > 60 {
-		fmt.Println("仅保留模型列表中的前 60 个")
-		models = models[:60]
-	}
-	settings.activeModel = pickModel(models, "启动后默认使用的模型")
+	fmt.Println("固定模型列表：")
+	settings.activeModel = pickModel(fixedRelayModels, "启动后默认使用的模型")
 	contextWindow, err := strconv.Atoi(ask("上下文窗口大小", "272000"))
 	if err != nil || contextWindow <= 0 {
 		return errors.New("上下文窗口大小必须是正整数")
@@ -766,7 +677,7 @@ func taskRelay() error {
 	if !confirm("备份已有配置并写入新的中转配置", false) {
 		return nil
 	}
-	backup, catalog, err := saveRelayConfig(dir, original, settings, buildCatalog(models, settings.providerName, contextWindow, vision))
+	backup, catalog, err := saveRelayConfig(dir, original, settings, buildCatalog(fixedRelayModels, settings.providerName, contextWindow, vision))
 	if backup != "" {
 		fmt.Println("原配置备份：", backup)
 	}
