@@ -31,7 +31,7 @@ go build -trimpath -ldflags='-s -w' -o codex-tool .
 
 ### 自定义供应方
 
-`relay` 使用固定的五个模型：`deepseek-v4-flash`、`deepseek-v4-pro`、`gpt-6-luna`、`glm-5.3`、`glm-5.3-flash`。它不会向中转站查询模型，也不会把其他模型写入目录。供应方需要支持 Codex 使用的 Responses API，并提供这五个模型 ID。
+`relay` 使用固定的五个模型：`deepseek-v4-flash`、`deepseek-v4-pro`、`gpt-6-luna`、`glm-5.3`、`glm-5.3-flash`。它不会向中转站查询模型，也不会把其他模型写入目录。供应方需要支持 Codex 使用的 Responses API，并提供这五个模型 ID。生成的模型目录启用搜索、推理摘要和 Verbosity，`supported_reasoning_levels` 只包含 `medium`。
 
 如供应方需要 API 密钥，输入**环境变量名**，例如 `MY_RELAY_API_KEY`。在运行本工具及使用该供应方的 Codex 进程中设置该变量。自定义带密钥的网络地址请使用 HTTPS。
 
