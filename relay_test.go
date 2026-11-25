@@ -137,6 +137,13 @@ func TestFixedRelayCatalogContainsExactlyRequestedModels(t *testing.T) {
 		if model.Slug != want[i] || model.DisplayName != want[i] || model.Priority != i+1 {
 			t.Fatalf("model %d is %#v, want slug and display name %q", i, model, want[i])
 		}
+		if !model.SupportsSearchTool || !model.SupportsReasoningSummaries || !model.SupportVerbosity {
+			t.Errorf("model %q does not enable search, reasoning summaries, and verbosity", model.Slug)
+		}
+		if model.DefaultReasoningLevel != "medium" || len(model.SupportedReasoningLevels) != 1 ||
+			model.SupportedReasoningLevels[0].Effort != "medium" {
+			t.Errorf("model %q does not use only the medium reasoning level", model.Slug)
+		}
 	}
 }
 

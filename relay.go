@@ -89,9 +89,7 @@ func buildCatalog(models []string, providerName string, ctx int, vision bool) ca
 	if vision {
 		modalities = append(modalities, "image")
 	}
-	levels := []reasoningLevel{
-		{Effort: "low"}, {Effort: "medium"}, {Effort: "high"}, {Effort: "xhigh"},
-	}
+	levels := []reasoningLevel{{Effort: "medium"}}
 	cat := catalogFile{}
 	for i, id := range models {
 		cat.Models = append(cat.Models, catalogModel{
@@ -99,7 +97,7 @@ func buildCatalog(models []string, providerName string, ctx int, vision bool) ca
 			AutoCompactTokenLimit:         (ctx/10)*8 + (ctx%10)*8/10,
 			BaseInstructions:              "You are a coding assistant. Help the user with their programming tasks.",
 			ContextWindow:                 ctx,
-			DefaultReasoningLevel:         "high",
+			DefaultReasoningLevel:         "medium",
 			DefaultVerbosity:              "low",
 			Description:                   fmt.Sprintf("%s · %s", id, providerName),
 			DisplayName:                   id,
@@ -110,12 +108,12 @@ func buildCatalog(models []string, providerName string, ctx int, vision bool) ca
 			ServiceTiers:                  []any{},
 			ShellType:                     "shell_command",
 			Slug:                          id,
-			SupportVerbosity:              false,
+			SupportVerbosity:              true,
 			SupportedInAPI:                true,
 			SupportedReasoningLevels:      levels,
 			SupportsParallelToolCalls:     true,
-			SupportsReasoningSummaries:    false,
-			SupportsSearchTool:            false,
+			SupportsReasoningSummaries:    true,
+			SupportsSearchTool:            true,
 			TruncationPolicy:              truncationPolicy{Limit: 10000, Mode: "tokens"},
 			Visibility:                    "list",
 		})
